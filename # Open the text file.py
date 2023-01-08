@@ -1,14 +1,23 @@
-# Open the text file
-with open('text_file.txt', 'r') as f:
-  # Read the contents of the file into a list of lines
-  lines = f.readlines()
+import ebooklib
+from ebooklib import epub
+from math import ceil
 
-# Determine the number of lines per section
-lines_per_section = len(lines) // 10
+# Open the ePub file 
+#change the name of the book first 
+book = epub.read_epub('Tomorrow, and Tomorrow, and Tom - Gabrielle Zevin.epub')
 
-# Iterate over the sections
-for i in range(10):
-  # Create a new file for the current section
-  with open('section_{}.txt'.format(i), 'w') as f:
-    # Write the lines for the current section to the file
-    f.writelines(lines[i*lines_per_section:(i+1)*lines_per_section])
+# Extract the text from each chapter
+chapters = []
+for item in book.get_items_of_type(ebooklib.ITEM_DOCUMENT):
+    chapters.append(item.get_content())
+
+# Calculate the number of chapters per part
+chapters_per_part = ceil(len(chapters) / 30)
+
+# Iterate through the chapters and write each part to a separate text file
+for i in range(30):
+    start = i * chapters_per_part
+    end = start + chapters_per_part
+    with open(f'part{i+1}.txt', 'w') as f:
+        for chapter in chapters[start:end]:
+            f.write(chapter)
